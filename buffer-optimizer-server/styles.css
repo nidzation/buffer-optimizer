@@ -1,0 +1,8 @@
+video.lazy {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+video.lazy.loaded {
+    opacity: 1;
+}
