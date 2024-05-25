@@ -1,74 +1,43 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
-const http = require('http');
 const WebSocket = require('ws');
-const app = express();
-const port = process.env.PORT || 3000;
-const { validateSettings, errorHandler, logger } = require('./utils');
+const express = require('express');
 
-// Middleware to parse JSON bodies
+// Create a WebSocket server
+const wss = new WebSocket.Server({ port: 3000 });
+
+// Create an Express app
+const app = express();
+const PORT = 4000;
+
+// Configure Express to parse JSON body
 app.use(express.json());
 
-// Serve static files from the 'buffer-optimizer-server' directory
-app.use(express.static(path.join(__dirname)));
-
-// Example route to handle video optimization settings
-app.post('/optimize', async (req, res, next) => {
-    try {
-        const settings = req.body;
-        logger.info('Received settings:', settings);
-
-        // Validate settings
-        validateSettings(settings);
-
-        // Handle the optimization logic here
-        // Example: Perform optimization asynchronously
-        await performOptimization(settings);
-
-        // Respond with a success message
-        res.json({ message: 'Optimization settings received', settings });
-    } catch (error) {
-        next(error);
-    }
+// Handle POST requests to /errors route
+app.post('/errors', (req, res) => {
+  // Log errors received from the extension
+  console.error('Error from extension:', req.body.error);
+  res.status(200).send('Error received successfully.');
 });
 
-// Endpoint to receive error logs from the client
-app.post('/log-error', (req, res) => {
-    const { message, source, lineno, colno, error } = req.body;
-    logger.error(`Client error: ${message} at ${source}:${lineno}:${colno}`, error);
-    res.status(204).send(); // No content
+// Start the Express server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// Error handling middleware
-app.use(errorHandler);
+// Listen for WebSocket connections
+wss.on('connection', function connection(ws) {
+  console.log('New WebSocket connection');
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+  // Listen for messages from clients
+  ws.on('message', function incoming(message) {
+    // Parse the incoming message
+    const data = JSON.parse(message);
+    console.clear(); // Clear the console before printing new message
+    console.log('Received:', data);
 
-wss.on('connection', ws => {
-    console.log('WebSocket connection established.');
-    ws.on('message', message => {
-        const data = JSON.parse(message);
-        console.clear();
-        console.log(`Video Info:
-        - FPS: ${data.fps}
-        - Quality: ${data.quality}
-        - Bandwidth Usage: ${data.bandwidth} bytes`);
-    });
+    // Log FPS dynamically
+    console.log('FPS:', data.fps);
+  });
 });
 
-server.listen(port, () => {
-    logger.info(`Server is running at http://localhost:${port}`);
-});
-
-// Example function to perform optimization
-async function performOptimization(settings) {
-    // Simulate optimization process
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            logger.info('Optimization completed:', settings);
-            resolve();
-        }, 1000);
-    });
-}
+// Log server start
+console.log('WebSocket Server is running on http://localhost:3000');
