@@ -2,12 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Video Optimization</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
 </head>
 <body>
-    <video id="video" width="640" height="360" controls></video>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10/dist/hls.min.js"></script>
-    <script src="script.js"></script>
+    <h1>Video Player</h1>
+    <video id="videoPlayer" controls></video>
+    <p id="fpsDisplay">FPS: <span id="fps">0</span></p>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const fpsDisplay = document.getElementById('fps');
+
+        // Function to update FPS display
+        function updateFPS() {
+            const fps = calculateFPS(); // Your logic to calculate FPS goes here
+            fpsDisplay.textContent = `FPS: ${fps}`;
+        }
+
+        // Function to calculate FPS
+        function calculateFPS() {
+            // Your logic to calculate FPS goes here
+            // This is just a placeholder returning a random number between 24 and 30
+            return Math.floor(Math.random() * (30 - 24 + 1)) + 24;
+        }
+
+        // Update FPS display every second
+        setInterval(updateFPS, 1000);
+    </script>
 </body>
 </html>
